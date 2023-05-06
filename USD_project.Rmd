@@ -1,0 +1,117 @@
+---
+title: "Untitled"
+author: "Collins Kipkoech"
+date: "5/6/2023"
+output: word_document
+---
+
+```{r}
+rates <- read_excel("C:/Users/User/Desktop/Maven/rates.xlsx")
+```
+
+```{r}
+rates <- read_excel("C:/Users/User/Desktop/Maven/rates.xlsx")
+#ACF PLOT
+ts_data <- ts(rates$'US Dollar', start = c(2015, 1), frequency = 12)
+acf(ts_data, main = "Autocorrelation Plot")
+ts_data <- ts(rates$'US Dollar', start = c(2015, 1), frequency = 12)
+plot(ts_data, type = "l", xlab = "Year-Month", ylab = "Exchange Rate", 
+     main = "Exchange Rate Time Series Plot")
+
+#SEASONAL TREND
+plot(stl(ts_data, s.window="periodic"))
+rates_ma <- zoo::rollmean(rates$'US Dollar', k = 3, align = "right", fill = NA)
+
+#MOVING AVERAGE
+plot(rates$'US Dollar', type = "l", main = "Monthly Exchange Rates", xlab = "Month", ylab = "Exchange Rate")
+lines(rates_ma, col = "blue")
+legend("topright", legend = c("Exchange Rate", "3-Month Moving Average"), col = c("black", "blue"), lty = 1)
+library(forecast)
+
+#SIMPLE EXPONENTIAL
+rates_ts <- ts(rates$'US Dollar', start = c(2015, 1), frequency = 12)
+fit_ses <- ses(rates_ts)
+plot(fit_ses, main = "Simple Exponential Smoothing of Dollar Exchange Rates")
+
+
+# Load the forecast package
+library(forecast)
+
+# Convert date column to a time series object
+rates_ts <- ts(rates$'US Dollar', start = c(2015, 1), frequency = 12)
+
+
+#double exponential smoothing
+# Apply Double Exponential Smoothing
+fit <- ets(rates_ts, model = "ZAM")
+
+# Plot the forecasted values with a title
+plot(forecast(fit, h = 24), main = "Double Exponential Smoothing of Exchange Rates")
+
+
+
+#TRIPLE EXPONENTIAL SMOOTH
+# Load the forecast package
+library(forecast)
+# Convert the dataset to a time series object
+ts_rates <- ts(rates$'US Dollar', start = c(2015, 1), frequency = 12)
+
+# Fit a Triple Exponential Smoothing model
+fit <- ets(ts_rates, model = "AAN", damped = TRUE)
+
+# Forecast 12 months ahead
+fc <- forecast(fit, h = 12)
+
+# Plot the forecasts and the actual values
+plot(fc, xlab = "Year-Month", ylab = "Dollar Exchange Rate", main = "Triple Exponential Smoothing with Forecasts")
+lines(ts_rates, col = "blue")
+
+
+#BOX-JEAKINS
+library(ggplot2)
+ggplot(rates, aes(x = as.Date(paste(Year, Month, "01", sep = "-")), y = 'US Dollar')) +
+  geom_line() +
+  labs(x = "Date", y = "Exchange Rate", title = "Monthly Average Exchange Rates")
+
+
+
+#IDENTIFYING THE ORDER OF THE ARIMA
+# Convert the data to a time series
+ts_rates <- ts(rates$'US Dollar', start = c(2015, 1), frequency = 12)
+
+# Plot the time series
+plot(ts_rates, main = "Monthly Average Exchange Rates")
+
+# Autocorrelation plot
+acf(ts_rates)
+
+# Partial autocorrelation plot
+pacf(ts_rates)
+
+#ESTIMATING THE PARAMETERS OF THE ARIMA MODEL
+# Convert the 'rates' data frame to a time series object
+rates_ts <- ts(rates$'US Dollar', start = c(2015, 1), frequency = 12)
+
+# Fit an ARIMA(1,1,1) model to the time series
+arima_model <- arima(rates_ts, order = c(1,1,1))
+
+# Print the model summary
+summary(arima_model)
+
+
+# diagonizing the model(the last step)
+# Diagnose the ARIMA model
+par(mar = c(5, 4, 4, 2) + 0.1)
+tsdiag(arima_model)
+residuals <- residuals(arima_model)
+hist(residuals, breaks = 20, freq = FALSE, main = "Histogram of Residuals")
+curve(dnorm(x, mean = mean(residuals), sd = sd(residuals)), 
+      col = "brown", lwd = 2, add = TRUE, yaxt = "n", xaxt = "n")
+
+# A DENSITY PLOT
+residuals <- resid(arima_model)
+plot(density(residuals), main="Density Plot of Residuals")
+
+
+```
+
